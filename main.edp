@@ -11,12 +11,16 @@ string meshFileName = "demo/gyroid-scaffold.mesh";
 string solFileName = meshFileName + ".sol";
 string outputFileName = meshFileName + "-out.mesh";
 
-real sizeX = 16 + 10;
-real sizeY = 16 + 10;
-real sizeZ = 25 + 10;
-real centerX = sizeX/2;
-real centerY = sizeY/2;
-real centerZ = sizeZ/2;
+real sizeX; //= 16 + 10;
+real sizeY; //= 16 + 10;
+real sizeZ; //= 25 + 10;
+real centerX; //= sizeX/2;
+real centerY; //= sizeY/2;
+real centerZ; //= sizeZ/2;
+
+real marginX = 5;
+real marginY = 5;
+real marginZ = 5;
 int meshSize = 60; // number of mesh nodes on each edge of the box
 
 bool writeTestVtk = true;
@@ -37,6 +41,9 @@ bool doParallel = true; // if false, the code should be run with 1 MPI process o
 mesh3 Mesh;
 mesh3 MeshScaffold;
 
+MeshScaffold = readmesh3(meshFileName);
+include "dimension.idp"
+
 if (mpirank == 0)
 {
   cout << "Generating mesh..." << endl;
@@ -45,7 +52,6 @@ if (mpirank == 0)
   Mesh = tetgreconstruction(Mesh, switch="raAQ", regionlist=domain,
                           sizeofvolume=(sizeX/meshSize)*(sizeY/meshSize)*(sizeZ/meshSize)/6);
 }
-MeshScaffold = readmesh3(meshFileName);
 broadcast(processor(0), Mesh);
 
 fespace SpaceP1(Mesh, P1);
