@@ -6,10 +6,9 @@ load "parmmg"
 load "mmg"
 load "mshmet"
 load "tetgen"
+include "getARGV.idp"
 
-string meshFileName = "demo/gyroid-scaffold.mesh";
-string solFileName = meshFileName + ".sol";
-string outputFileName = meshFileName + "-out.mesh";
+include "parameters.idp"
 
 real sizeX; //= 16 + 10;
 real sizeY; //= 16 + 10;
@@ -17,26 +16,6 @@ real sizeZ; //= 25 + 10;
 real centerX; //= sizeX/2;
 real centerY; //= sizeY/2;
 real centerZ; //= sizeZ/2;
-
-real marginX = 5;
-real marginY = 5;
-real marginZ = 5;
-int meshSize = 60; // number of mesh nodes on each edge of the box
-
-bool writeTestVtk = true;
-
-bool refineMesh = true;
-string vtkFileName = meshFileName + ".vtu";
-real wd = 0.1; // threshold of phi for determining the refined region
-real mshmetError = 0.008; // tolerance for mesh refinement, used by mshmet
-real meshMin = 0.1; // minimum size of elements during mesh refinement
-real meshMax = 3; // minimum size of elements during mesh refinement
-real hausd = 1.0;
-real hgrad = 1.3;
-int nIterations = 3;
-int allowedMemory = 30000;
-
-bool doParallel = true; // if false, the code should be run with 1 MPI process only
 
 mesh3 Mesh;
 mesh3 MeshScaffold;
