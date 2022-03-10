@@ -9,6 +9,7 @@ load "tetgen"
 include "getARGV.idp"
 
 include "parameters.idp"
+include "functions.idp"
 
 real sizeX; //= 16 + 10;
 real sizeY; //= 16 + 10;
@@ -25,7 +26,7 @@ include "dimension.idp"
 
 if (mpirank == 0)
 {
-  cout << "Generating mesh..." << endl;
+  print("Generating mesh...");
   Mesh = cube(2, 2, 2, [sizeX*x-centerX, sizeY*y-centerY, sizeZ*z-centerZ]);
   real[int] domain = [0, 0, 0, 0, 1];
   Mesh = tetgreconstruction(Mesh, switch="raAQ", regionlist=domain,
@@ -42,7 +43,7 @@ SpaceP1 Z = z;
 
 if (mpirank == 0)
 {
-  cout << "Processing nodes..." << endl;
+  print("Processing nodes...");
   for (int i = 0; i < SpaceP1.ndof; i++)
   {
     if (chi(MeshScaffold)(X[][i], Y[][i], Z[][i]) == 1)
@@ -58,7 +59,7 @@ phi = phi - 0.5;
 if (refineMesh)
 {
   if (mpirank == 0)
-    cout << "Refining the mesh..." << endl;
+    print("Refining the mesh...");
 
   SpaceP1 phiTemp;
   distance(Mesh, phi, phiTemp[]);
@@ -93,6 +94,6 @@ if (mpirank == 0)
   savesol(solFileName, Mesh, phi);
   savemesh(Mesh, outputFileName);
 
-  cout << "Finite Element DOF: " + SpaceP1.ndof << endl;
-  cout << "Number of Elements: " + Mesh.nt << endl;;
+  print("Finite Element DOF: " + SpaceP1.ndof);
+  print("Number of Elements: " + Mesh.nt);
 }
