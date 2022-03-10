@@ -21,43 +21,62 @@ real shiftZ; //= sizeZ/2;
 mesh3 Mesh;
 mesh3 MeshScaffold;
 
-if (mpirank == 0)
+// importSolution = false : normal mode, read the input mesh and embed it
+// importSolution = true : import mode, using an already calculated soltuion on a mesh
+
+if (!importSolution)
+{
+  if (mpirank == 0)
   print("Reading input mesh...");
 
-MeshScaffold = readmesh3(meshFileName);
-include "dimension.idp"
+  MeshScaffold = readmesh3(meshFileName);
+  include "dimension.idp"
 
-if (mpirank == 0)
-{
+  if (mpirank == 0)
+  {
   print("Generating mesh...");
   Mesh = cube(2, 2, 2, [sizeX*x-shiftX, sizeY*y-shiftY, sizeZ*z-shiftZ]);
   real[int] domain = [0, 0, 0, 0, 1];
   Mesh = tetgreconstruction(Mesh, switch="raAQ", regionlist=domain,
                           sizeofvolume=(sizeX/meshSize)*(sizeY/meshSize)*(sizeZ/meshSize)/6);
+  }
+  broadcast(processor(0), Mesh);
 }
-broadcast(processor(0), Mesh);
+else
+{
+  Mesh = readmesh3(outputFileName);
+  outputFileName = outputFileName + ".mesh";
+}
 
 fespace SpaceP1(Mesh, P1);
 SpaceP1 phi = 0;
 
-SpaceP1 X = x;
-SpaceP1 Y = y;
-SpaceP1 Z = z;
-
-if (mpirank == 0)
+if (!importSolution)
 {
-  print("Processing nodes...");
-  for (int i = 0; i < SpaceP1.ndof; i++)
-  {
-    if (chi(MeshScaffold)(X[][i], Y[][i], Z[][i]) == 1)
-      phi[][i] = 1;
-    cout << "\rProcessed: " << i << " / " << SpaceP1.ndof;
-  }
-  cout << endl;
-}
-broadcast(processor(0), phi[]);
+  SpaceP1 X = x;
+  SpaceP1 Y = y;
+  SpaceP1 Z = z;
 
-phi = phi - 0.5;
+  if (mpirank == 0)
+  {
+    print("Processing nodes...");
+    for (int i = 0; i < SpaceP1.ndof; i++)
+    {
+      if (chi(MeshScaffold)(X[][i], Y[][i], Z[][i]) == 1)
+        phi[][i] = 1;
+      cout << "\rProcessed: " << i << " / " << SpaceP1.ndof;
+    }
+    cout << endl;
+  }
+  broadcast(processor(0), phi[]);
+
+  phi = phi - 0.5;
+}
+else
+{
+  phi[] = readsol(solFileName);
+  solFileName = solFileName + ".sol";
+}
 
 if (refineMesh)
 {
