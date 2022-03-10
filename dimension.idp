@@ -29,9 +29,13 @@ macro idpDimen 1 // prevent multiple include statements
   sizeY = sizeY + 2 * marginX;
   sizeZ = sizeZ + 2 * marginX;
 
-  centerX = sizeX / 2;
-  centerY = sizeY / 2;
-  centerZ = sizeZ / 2;
+  real centerX = (xMax + xMin) / 2;
+  real centerY = (yMax + yMin) / 2;
+  real centerZ = (zMax + zMin) / 2;
+
+  shiftX = sizeX / 2 - centerX;
+  shiftY = sizeY / 2 - centerY;
+  shiftZ = sizeZ / 2 - centerZ;
 }
 
 ENDIFMACRO

@@ -14,12 +14,15 @@ include "functions.idp"
 real sizeX; //= 16 + 10;
 real sizeY; //= 16 + 10;
 real sizeZ; //= 25 + 10;
-real centerX; //= sizeX/2;
-real centerY; //= sizeY/2;
-real centerZ; //= sizeZ/2;
+real shiftX; //= sizeX/2;
+real shiftY; //= sizeY/2;
+real shiftZ; //= sizeZ/2;
 
 mesh3 Mesh;
 mesh3 MeshScaffold;
+
+if (mpirank == 0)
+  print("Reading input mesh...");
 
 MeshScaffold = readmesh3(meshFileName);
 include "dimension.idp"
@@ -27,7 +30,7 @@ include "dimension.idp"
 if (mpirank == 0)
 {
   print("Generating mesh...");
-  Mesh = cube(2, 2, 2, [sizeX*x-centerX, sizeY*y-centerY, sizeZ*z-centerZ]);
+  Mesh = cube(2, 2, 2, [sizeX*x-shiftX, sizeY*y-shiftY, sizeZ*z-shiftZ]);
   real[int] domain = [0, 0, 0, 0, 1];
   Mesh = tetgreconstruction(Mesh, switch="raAQ", regionlist=domain,
                           sizeofvolume=(sizeX/meshSize)*(sizeY/meshSize)*(sizeZ/meshSize)/6);
