@@ -17,6 +17,7 @@ real sizeZ; //= 25 + 10;
 real shiftX; //= sizeX/2;
 real shiftY; //= sizeY/2;
 real shiftZ; //= sizeZ/2;
+real xMin, xMax, yMin, yMax, zMin, zMax;
 
 mesh3 Mesh;
 mesh3 MeshScaffold;
@@ -27,18 +28,18 @@ mesh3 MeshScaffold;
 if (!importSolution)
 {
   if (mpirank == 0)
-  print("Reading input mesh...");
+    print("Reading input mesh...");
 
   MeshScaffold = readmesh3(meshFileName);
   include "dimension.idp"
 
   if (mpirank == 0)
   {
-  print("Generating mesh...");
-  Mesh = cube(2, 2, 2, [sizeX*x-shiftX, sizeY*y-shiftY, sizeZ*z-shiftZ]);
-  real[int] domain = [0, 0, 0, 0, 1];
-  Mesh = tetgreconstruction(Mesh, switch="raAQ", regionlist=domain,
-                          sizeofvolume=(sizeX/meshSize)*(sizeY/meshSize)*(sizeZ/meshSize)/6);
+    print("Generating mesh...");
+    Mesh = cube(2, 2, 2, [sizeX*x-shiftX, sizeY*y-shiftY, sizeZ*z-shiftZ]);
+    real[int] domain = [0, 0, 0, 0, 1];
+    Mesh = tetgreconstruction(Mesh, switch="raAQ", regionlist=domain,
+                            sizeofvolume=(sizeX/meshSize)*(sizeY/meshSize)*(sizeZ/meshSize)/6);
   }
   broadcast(processor(0), Mesh);
 }
@@ -57,13 +58,21 @@ if (!importSolution)
   SpaceP1 Y = y;
   SpaceP1 Z = z;
 
+  SpaceP1 elemSize = hTriangle;
+  real bound = elemSize[].max;
+  if (mpirank == 0)
+    print(bound);
+
   if (mpirank == 0)
   {
     print("Processing nodes...");
     for (int i = 0; i < SpaceP1.ndof; i++)
     {
-      if (chi(MeshScaffold)(X[][i], Y[][i], Z[][i]) == 1)
-        phi[][i] = 1;
+      if (X[][i] > xMin-bound && X[][i] < xMax+bound &&
+          Y[][i] > yMin-bound && Y[][i] < yMax+bound &&
+          Z[][i] > zMin-bound && Z[][i] < zMax+bound)
+        if (chi(MeshScaffold)(X[][i], Y[][i], Z[][i]) == 1)
+          phi[][i] = 1;
       cout << "\rProcessed: " << i << " / " << SpaceP1.ndof;
     }
     cout << endl;

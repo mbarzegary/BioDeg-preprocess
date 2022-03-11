@@ -8,12 +8,12 @@ macro idpDimen 1 // prevent multiple include statements
   SpaceP1Scaff Y = y;
   SpaceP1Scaff Z = z;
 
-  real xMin = X[].min;
-  real xMax = X[].max;
-  real yMin = Y[].min;
-  real yMax = Y[].max;
-  real zMin = Z[].min;
-  real zMax = Z[].max;
+  xMin = X[].min;
+  xMax = X[].max;
+  yMin = Y[].min;
+  yMax = Y[].max;
+  zMin = Z[].min;
+  zMax = Z[].max;
 
   if (mpirank == 0)
     cout << xMin << " " << xMax << " " << yMin << " " << yMax << " " << zMin << " " << zMax << endl;
